@@ -31,7 +31,7 @@ Perfect for **touchless computing**, accessibility, presentations, or just a coo
 
 We recommend using a virtual environment:
 
-````bash
+```bash
 # Create and activate a virtual environment
 python -m venv venv
 # Windows: venv\Scripts\activate
@@ -40,34 +40,33 @@ python -m venv venv
 Then install the required packages:
 pip install -r requirements.txt
 
+```
 
-## 🚀 How to Use
+### 🚀 How to Use
 
 1. Clone or download this repository.
 2. Install the required dependencies:
    ```bash
    pip install opencv-python mediapipe autopy numpy
+   ```
 
-
-## 🖐️ Gesture Guide
+### 🖐️ Gesture Guide
 
 | Gesture            | Fingers Up (Thumb → Pinky) | Action                                      |
-|--------------------|----------------------------|---------------------------------------------|
-| 👆 Point           | `[0, 1, 0, 0, 0]`          | Move cursor                                |
-| ✌️ Click           | `[0, 1, 0, 0, 1]`          | Left-click (after 1.1 seconds hold)        |
-| ✋ Freeze/Unfreeze  | `[1, 1, 1, 1, 1]`          | Toggle cursor freeze (after 5 seconds hold) |
-
+| ------------------ | -------------------------- | ------------------------------------------- |
+| 👆 Point           | `[0, 1, 0, 0, 0]`          | Move cursor                                 |
+| ✌️ Click           | `[0, 1, 0, 0, 1]`          | Left-click (after 1.1 seconds hold)         |
+| ✋ Freeze/Unfreeze | `[1, 1, 1, 1, 1]`          | Toggle cursor freeze (after 5 seconds hold) |
 
 ⚙️ Configuration
 You can customize the behavior by modifying these parameters at the top of virtual_mouse.py:
 
-wCam, hCam = 640, 480        # Camera resolution (width, height)
-frameR = 100                 # Reduced tracking area (pixels from each edge)
-smoothening = 5              # Cursor smoothing (higher = smoother but less responsive)
-click_hold_time = 1.1        # Seconds to hold index + pinky for a click
-freeze_hold_duration = 5.0   # Seconds to hold all fingers for freeze/unfreeze
+wCam, hCam = 640, 480 # Camera resolution (width, height)
+frameR = 100 # Reduced tracking area (pixels from each edge)
+smoothening = 5 # Cursor smoothing (higher = smoother but less responsive)
+click_hold_time = 1.1 # Seconds to hold index + pinky for a click
+freeze_hold_duration = 5.0 # Seconds to hold all fingers for freeze/unfreeze
 
+```
 
-
-
-````
+```
