@@ -55,7 +55,8 @@ pip install -r requirements.txt
 | Gesture            | Fingers Up (Thumb → Pinky) | Action                                      |
 | ------------------ | -------------------------- | ------------------------------------------- |
 | 👆 Point           | `[0, 1, 0, 0, 0]`          | Move cursor                                 |
-| ✌️ Click           | `[0, 1, 0, 0, 1]`          | Left-click (after 1.1 seconds hold)         |
+| ✌️ Click           | `[0, 1, 1, 0, 0]`          | Left-click (after 1.1 seconds hold)         |
+| ✌️ esc             |                            | Presses esc (after 1 second hold)           |
 | ✋ Freeze/Unfreeze | `[1, 1, 1, 1, 1]`          | Toggle cursor freeze (after 5 seconds hold) |
 
 ⚙️ Configuration

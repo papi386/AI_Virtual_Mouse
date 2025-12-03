@@ -14,28 +14,24 @@ class handDetector():
 
         self.mpHands = mp.solutions.hands
 
-    # FIXED VERSION:
         self.hands = self.mpHands.Hands(
-        static_image_mode=self.mode,
-        max_num_hands=self.maxHands,
-        min_detection_confidence=self.detectionCon,
-        min_tracking_confidence=self.trackCon
-    )
+            static_image_mode=self.mode,
+            max_num_hands=self.maxHands,
+            min_detection_confidence=self.detectionCon,
+            min_tracking_confidence=self.trackCon
+        )
 
         self.mpDraw = mp.solutions.drawing_utils
-        self.tipIds = [4, 8, 12, 16, 20]
-
+        self.tipIds = [4, 8, 12, 16, 20]  # Thumb, Index, Middle, Ring, Pinky
 
     def findHands(self, img, draw=True):
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.results = self.hands.process(imgRGB)
-        # print(results.multi_hand_landmarks)
 
         if self.results.multi_hand_landmarks:
             for handLms in self.results.multi_hand_landmarks:
                 if draw:
-                    self.mpDraw.draw_landmarks(img, handLms,
-                                               self.mpHands.HAND_CONNECTIONS)
+                    self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
 
         return img
 
@@ -47,12 +43,10 @@ class handDetector():
         if self.results.multi_hand_landmarks:
             myHand = self.results.multi_hand_landmarks[handNo]
             for id, lm in enumerate(myHand.landmark):
-                # print(id, lm)
                 h, w, c = img.shape
                 cx, cy = int(lm.x * w), int(lm.y * h)
                 xList.append(cx)
                 yList.append(cy)
-                # print(id, cx, cy)
                 self.lmList.append([id, cx, cy])
                 if draw:
                     cv2.circle(img, (cx, cy), 5, (255, 0, 255), cv2.FILLED)
@@ -62,32 +56,63 @@ class handDetector():
             bbox = xmin, ymin, xmax, ymax
 
             if draw:
-                cv2.rectangle(img, (xmin - 20, ymin - 20), (xmax + 20, ymax + 20),
-                              (0, 255, 0), 2)
+                cv2.rectangle(img, (xmin - 20, ymin - 20), (xmax + 20, ymax + 20), (0, 255, 0), 2)
 
         return self.lmList, bbox
 
     def fingersUp(self):
         fingers = []
+        if len(self.lmList) == 0:
+            return [0, 0, 0, 0, 0]
+
         # Thumb
         if self.lmList[self.tipIds[0]][1] > self.lmList[self.tipIds[0] - 1][1]:
             fingers.append(1)
         else:
             fingers.append(0)
 
-        # Fingers
+        # Fingers: index to pinky
         for id in range(1, 5):
+            tip_y = self.lmList[self.tipIds[id]][2]
+            pip_y = self.lmList[self.tipIds[id] - 2][2]  # PIP joint (two joints before tip)
 
-            if self.lmList[self.tipIds[id]][2] < self.lmList[self.tipIds[id] - 2][2]:
+            # Original logic: tip above PIP → up
+            if tip_y < pip_y:
                 fingers.append(1)
             else:
                 fingers.append(0)
 
-        # totalFingers = fingers.count(1)
+        return fingers
+
+    def fingersDown(self):
+
+        fingers = []
+        if len(self.lmList) < 21:
+            return [0, 0, 0, 0, 0]
+
+    # Thumb: we skip or use simplified logic (thumb direction is ambiguous)
+    # Here we just reuse the standard thumb logic (optional)
+        if self.lmList[self.tipIds[0]][1] > self.lmList[self.tipIds[0] - 1][1]:
+            fingers.append(1)  # Treat as "down" if pointing right (common in palm-up)
+        else:
+            fingers.append(0)
+
+    # MCP joints for index to pinky
+        mcp_ids = [5, 9, 13, 17]
+
+        for i in range(1, 5):
+            tip_y = self.lmList[self.tipIds[i]][2]
+            mcp_y = self.lmList[mcp_ids[i - 1]][2]
+
+        # If tip is BELOW MCP → pointing DOWN
+            if tip_y > mcp_y + 10:  # +10 = noise threshold (in pixels)
+                fingers.append(1)
+            else:
+                fingers.append(0)
 
         return fingers
 
-    def findDistance(self, p1, p2, img, draw=True,r=15, t=3):
+    def findDistance(self, p1, p2, img, draw=True, r=15, t=3):
         x1, y1 = self.lmList[p1][1:]
         x2, y2 = self.lmList[p2][1:]
         cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
@@ -122,5 +147,12 @@ def main():
                     (255, 0, 255), 3)
 
         cv2.imshow("Image", img)
-        cv2.waitKey(1)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    main()
